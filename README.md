@@ -1,12 +1,26 @@
+# 首要声明
+此库和demo主要是clone来自这位带哥的Repository[YeDaxia/Android-YRichEditor](https://github.com/YeDaxia/Android-YRichEditor)，感谢
+<br>当然是做了适合自己的修改，主要修改内容如下
+
+1. 升级了demo和module的依赖库
+2. 修复二次编辑「点击提交」已上传的图片检测不出的问题
+3. 修改了一些适合自己的样式问题
+4. demo也修改了一些样式和功能
+
+一些提示：
+
+1. 建议直接clone下来运行看看，因为现在的demo只适合我自己的需求
+2. 此富文本编辑器功能挺丰富的，但是我只用到了「插图」和「加粗」，demo里的其他功能我在xml里设置成GONE了，因此想看其他功能请务必自己修改
+3. 更多的需求请查看以下的内容，因为下面的md文件除了失效的其余我没改过
+
+提供一张预览图：
+
+<img src="https://github.com/wenwenwen888/Android-YRichEditor/blob/master/preview/1.png" width="30%" height="30%">
+
+
 # Android-YRichEditor
 
 an android richedtor with native implementation
-
-![](http://7ktocj.com1.z0.glb.clouddn.com/device-2017-05-25-163507.png?imageView2/0/w/500)
-
-# Demo Download
-
-![apk demo](http://7xjwoa.com1.z0.glb.clouddn.com/1495715723.png)
 
 # Feature
 
