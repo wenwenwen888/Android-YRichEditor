@@ -21,10 +21,13 @@
         </activity>
         <activity
             android:name=".EditorActivity"
-            android:windowSoftInputMode="adjustResize|stateAlwaysVisible"
-            android:label="编辑器"/>
+            android:label="编辑器"
+            android:windowSoftInputMode="adjustResize|stateAlwaysVisible" />
         <activity android:name=".RawCodeActivity" />
-        <activity android:name=".ShowHtmlActivity" android:label="内容详情"/>
+
+        <activity
+            android:name=".ShowHtmlActivity"
+            android:label="内容详情" />
     </application>
 
 </manifest>

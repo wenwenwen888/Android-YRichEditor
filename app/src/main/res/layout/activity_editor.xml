@@ -12,20 +12,21 @@
         app:popupTheme="@style/AppTheme.PopupOverlay" />
 
     <io.github.yedaxia.richeditor.RichTextEditor
-        android:layout_below="@+id/toolbar"
         android:id="@+id/rich_editor"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@+id/toolbar"
+        android:layout_marginBottom="44dp"
         app:rich_hint="Write Somethine..."
         app:rich_hintTextColor="#f7f7f7"
-        app:rich_paddingBottom="50dp"
+        app:rich_paddingBottom="15dp"
         app:rich_paddingLeft="15dp"
         app:rich_paddingRight="15dp"
-        app:rich_paddingTop="30dp"
+        app:rich_paddingTop="15dp"
         app:rich_textColor="#333"
         app:rich_textSize="15dp" />
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="44dp"
         android:layout_alignParentBottom="true"
@@ -33,48 +34,65 @@
         android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/tv_add_img"
-            android:layout_width="60dp"
+            android:id="@+id/tv_show_keyboard"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:gravity="center"
-            android:textStyle="bold"
             android:background="?android:attr/selectableItemBackground"
-            android:text="Image"/>
+            android:gravity="center"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:text="展开键盘" />
+
 
         <TextView
             android:id="@+id/tv_bold"
             android:layout_width="60dp"
             android:layout_height="match_parent"
-            android:gravity="center"
-            android:textStyle="bold"
+            android:layout_alignParentRight="true"
             android:background="?android:attr/selectableItemBackground"
-            android:text="Bold" />
+            android:gravity="center"
+            android:text="Bold"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_add_img"
+            android:layout_width="60dp"
+            android:layout_height="match_parent"
+            android:layout_toLeftOf="@id/tv_bold"
+            android:background="?android:attr/selectableItemBackground"
+            android:gravity="center"
+            android:text="Image"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tv_paragraph"
             android:layout_width="60dp"
             android:layout_height="match_parent"
-            android:gravity="center"
-            android:textStyle="bold"
             android:background="?android:attr/selectableItemBackground"
-            android:text="P" />
+            android:gravity="center"
+            android:text="P"
+            android:textStyle="bold"
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/tv_heading"
             android:layout_width="60dp"
             android:layout_height="match_parent"
-            android:gravity="center"
-            android:textStyle="bold"
             android:background="?android:attr/selectableItemBackground"
-            android:text="H" />
+            android:gravity="center"
+            android:text="H"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
         <TextView
             android:id="@+id/tv_link"
             android:layout_width="60dp"
             android:layout_height="match_parent"
-            android:gravity="center"
-            android:textStyle="bold"
             android:background="?android:attr/selectableItemBackground"
-            android:text="Link" />
-    </LinearLayout>
+            android:gravity="center"
+            android:text="Link"
+            android:textStyle="bold"
+            android:visibility="gone" />
+    </RelativeLayout>
 
 </RelativeLayout>

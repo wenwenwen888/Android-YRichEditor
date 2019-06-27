@@ -2,6 +2,7 @@ package io.github.yedaxia.richeditor;
 
 import android.net.Uri;
 import android.support.annotation.IntDef;
+import android.widget.EditText;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -68,4 +69,10 @@ public interface IRichEditor {
      * @return
      */
     String getHtmlContent();
+
+    /**
+     * 获取当前的EdiText
+     * @return
+     */
+    EditText getCurrentFocusEdit();
 }

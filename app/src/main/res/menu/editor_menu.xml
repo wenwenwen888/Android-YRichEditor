@@ -9,10 +9,10 @@
         android:orderInCategory="100"
         android:title="保存草稿"
         app:showAsAction="always" />
-    、
+
     <item
-        android:id="@+id/action_post"
+        android:id="@+id/action_preview"
         android:orderInCategory="100"
-        android:title="提交服务器"
+        android:title="预览"
         app:showAsAction="always" />
 </menu>

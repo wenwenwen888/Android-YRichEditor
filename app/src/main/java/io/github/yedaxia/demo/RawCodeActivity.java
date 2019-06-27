@@ -9,8 +9,6 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import io.github.yedaxia.demo.html.HtmlParser;
-
 /**
  * @author Darcy https://yedaxia.github.io/
  * @version 2017/5/20.
@@ -29,7 +27,7 @@ public class RawCodeActivity extends AppCompatActivity {
         SpHelper spHelper = new SpHelper(this);
         TextView tvCode = new TextView(this);
         tvCode.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        HtmlParser.parse(spHelper.getContent());
+        tvCode.setText(spHelper.getContent());
         setContentView(tvCode);
     }
 }

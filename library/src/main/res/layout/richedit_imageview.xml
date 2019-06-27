@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <io.github.yedaxia.richeditor.RichImageLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content" >
+    android:layout_width="157dp"
+    android:layout_height="wrap_content">
 
     <io.github.yedaxia.richeditor.EditImageView
         android:id="@+id/edit_imageView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="5dp"
         android:scaleType="centerCrop" />
 
     <ImageView
@@ -16,11 +16,12 @@
         android:layout_height="50dp"
         android:layout_alignTop="@id/edit_imageView"
         android:layout_alignRight="@id/edit_imageView"
-        android:paddingBottom="20dp"
         android:paddingLeft="20dp"
-        android:paddingRight="5dp"
         android:paddingTop="5dp"
+        android:paddingRight="5dp"
+        android:paddingBottom="20dp"
         android:scaleType="fitXY"
-        android:src="@mipmap/icon_close" />
+        android:src="@mipmap/icon_close"
+        android:visibility="gone" />
 
 </io.github.yedaxia.richeditor.RichImageLayout>

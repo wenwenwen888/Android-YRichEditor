@@ -18,18 +18,24 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.zhihu.matisse.Matisse;
 import com.zhihu.matisse.MimeType;
 import com.zhihu.matisse.engine.impl.GlideEngine;
+
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener;
+import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil;
 
 import java.util.HashMap;
 import java.util.List;
@@ -41,7 +47,7 @@ import io.github.yedaxia.richeditor.IRichEditor;
 import io.github.yedaxia.richeditor.IUploadEngine;
 import io.github.yedaxia.richeditor.RichTextEditor;
 
-public class EditorActivity extends AppCompatActivity implements View.OnClickListener{
+public class EditorActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final String KEY_CONTENT = "key_content";
 
@@ -50,10 +56,10 @@ public class EditorActivity extends AppCompatActivity implements View.OnClickLis
 
     private static final int MAX_TRY_UPLOAD_TIME = 10;
 
+    private TextView tvShowKeyboard, tvBold;
     private RichTextEditor richTextEditor;
     private Dialog linkInputDialog;
     private ProgressDialog progressDialog;
-
 
     private Handler uiHandler = new Handler();
 
@@ -64,13 +70,13 @@ public class EditorActivity extends AppCompatActivity implements View.OnClickLis
     private int tryPostTime;
     private boolean isPosting;
 
-    public static void launch(Context context){
-        Intent intent = new Intent(context,EditorActivity.class);
+    public static void launch(Context context) {
+        Intent intent = new Intent(context, EditorActivity.class);
         context.startActivity(intent);
     }
 
-    public static void launch(Context context, String htmlContent){
-        Intent intent = new Intent(context,EditorActivity.class);
+    public static void launch(Context context, String htmlContent) {
+        Intent intent = new Intent(context, EditorActivity.class);
         intent.putExtra(KEY_CONTENT, htmlContent);
         context.startActivity(intent);
     }
@@ -79,22 +85,35 @@ public class EditorActivity extends AppCompatActivity implements View.OnClickLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editor);
-        richTextEditor = (RichTextEditor)findViewById(R.id.rich_editor);
-        initRichEditor();
+        richTextEditor = findViewById(R.id.rich_editor);
+        tvShowKeyboard = findViewById(R.id.tv_show_keyboard);
+        tvBold = findViewById(R.id.tv_bold);
 
+        tvShowKeyboard.setOnClickListener(this);
+        tvBold.setOnClickListener(this);
         findViewById(R.id.tv_add_img).setOnClickListener(this);
-        findViewById(R.id.tv_bold).setOnClickListener(this);
         findViewById(R.id.tv_heading).setOnClickListener(this);
         findViewById(R.id.tv_paragraph).setOnClickListener(this);
         findViewById(R.id.tv_link).setOnClickListener(this);
 
+        initRichEditor();
+
         spHelper = new SpHelper(getApplication());
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        //监听键盘展开-收起
+        KeyboardVisibilityEvent.setEventListener(this, new KeyboardVisibilityEventListener() {
+            @Override
+            public void onVisibilityChanged(boolean isOpen) {
+                checkKeyboardOpen(isOpen);
+            }
+        });
+
     }
 
-    private void initRichEditor(){
+    private void initRichEditor() {
 
         //设置图片加载器，必须
         richTextEditor.setImageLoader(new IImageLoader() {
@@ -117,47 +136,49 @@ public class EditorActivity extends AppCompatActivity implements View.OnClickLis
             @Override
             public void cancelUpload(Uri imgUrl) {
                 AsyncTask task = taskMap.get(imgUrl);
-                if(task != null && !task.isCancelled()){
+                if (task != null && !task.isCancelled()) {
                     task.cancel(true);
                 }
             }
         });
 
-
         String htmlContent = getIntent().getStringExtra(KEY_CONTENT);
-        if(!YUtils.isEmpty(htmlContent)){
+        if (!YUtils.isEmpty(htmlContent)) {
             richTextEditor.setHtmlContent(htmlContent);
         }
     }
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
+        switch (v.getId()) {
+            case R.id.tv_show_keyboard:
+                onShowKeyboardClick();
+                break;
             case R.id.tv_add_img:
-                onAddImageClick(v);
+                onAddImageClick();
                 break;
             case R.id.tv_bold:
-                onBoldClick(v);
+                richTextEditor.toggleBoldSelectText();
                 break;
             case R.id.tv_heading:
-                onHeadingClick(v);
+                richTextEditor.insertHeading(IRichEditor.HEADING_1);
                 break;
             case R.id.tv_paragraph:
-                onParagraphClick(v);
+                richTextEditor.insertParagraph();
                 break;
             case R.id.tv_link:
-                onLinkClick(v);
+                onLinkClick();
                 break;
             default:
                 break;
         }
     }
 
-    private void onLinkClick(View v) {
-        if(linkInputDialog == null){
+    private void onLinkClick() {
+        if (linkInputDialog == null) {
             View linkInputView = LayoutInflater.from(this).inflate(R.layout.dialog_link, null);
-            final EditText etText = (EditText)linkInputView.findViewById(R.id.et_text);
-            final EditText etLink = (EditText)linkInputView.findViewById(R.id.et_link);
+            final EditText etText = linkInputView.findViewById(R.id.et_text);
+            final EditText etLink = linkInputView.findViewById(R.id.et_link);
             linkInputDialog = new AlertDialog.Builder(this)
                     .setTitle("添加链接")
                     .setView(linkInputView)
@@ -167,7 +188,7 @@ public class EditorActivity extends AppCompatActivity implements View.OnClickLis
                         public void onClick(DialogInterface dialog, int which) {
                             String text = etText.getText().toString().trim();
                             String link = etLink.getText().toString().trim();
-                            if(text.isEmpty() || link.isEmpty()){
+                            if (text.isEmpty() || link.isEmpty()) {
                                 Toast.makeText(getApplication(), "内容不能为空", Toast.LENGTH_SHORT).show();
                                 return;
                             }
@@ -183,22 +204,26 @@ public class EditorActivity extends AppCompatActivity implements View.OnClickLis
         richTextEditor.insertHyperlink(text, link);
     }
 
-    private void onParagraphClick(View v) {
-        richTextEditor.insertParagraph();
+    private void onShowKeyboardClick() {
+        if (KeyboardVisibilityEvent.isKeyboardVisible(this)) {
+            UIUtil.hideKeyboard(this);
+        } else {
+            UIUtil.showKeyboard(this, richTextEditor.getCurrentFocusEdit());
+        }
     }
 
-    private void onHeadingClick(View v) {
-        richTextEditor.insertHeading(IRichEditor.HEADING_1);
+    private void checkKeyboardOpen(boolean isOpen) {
+        if (isOpen) {
+            tvShowKeyboard.setText("收起键盘");
+        } else {
+            tvShowKeyboard.setText("展开键盘");
+        }
     }
 
-    private void onBoldClick(View v) {
-        richTextEditor.toggleBoldSelectText();
-    }
-
-    private void onAddImageClick(View v) {
+    private void onAddImageClick() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CODE_PERMISSION);
-        }else{
+        } else {
             startSelectImageIntent();
         }
     }
@@ -208,7 +233,7 @@ public class EditorActivity extends AppCompatActivity implements View.OnClickLis
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_SELECT_IMG && resultCode == RESULT_OK) {
             List<Uri> imgUris = Matisse.obtainResult(data);
-            for(Uri imgUri : imgUris){
+            for (Uri imgUri : imgUris) {
                 richTextEditor.insertImage(imgUri);
             }
         }
@@ -217,7 +242,7 @@ public class EditorActivity extends AppCompatActivity implements View.OnClickLis
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if(REQUEST_CODE_PERMISSION == requestCode){
+        if (REQUEST_CODE_PERMISSION == requestCode) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 startSelectImageIntent();
             }
@@ -232,11 +257,11 @@ public class EditorActivity extends AppCompatActivity implements View.OnClickLis
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.action_save_draft:
                 onSaveDraftClick();
                 break;
-            case R.id.action_post:
+            case R.id.action_preview:
                 onPostClick();
                 break;
         }
@@ -247,7 +272,7 @@ public class EditorActivity extends AppCompatActivity implements View.OnClickLis
     protected void onDestroy() {
         super.onDestroy();
         uiHandler.removeCallbacksAndMessages(null);
-        for(AsyncTask task : taskMap.values()){
+        for (AsyncTask task : taskMap.values()) {
             task.cancel(true);
         }
     }
@@ -255,26 +280,30 @@ public class EditorActivity extends AppCompatActivity implements View.OnClickLis
     private void onSaveDraftClick() {
         String htmlContent = richTextEditor.getHtmlContent();
         spHelper.saveContent(htmlContent);
-        Toast.makeText(this,"保存成功", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "保存成功", Toast.LENGTH_SHORT).show();
         finish();
     }
 
     private void onPostClick() {
 
         String htmlContent = richTextEditor.getHtmlContent();
-        if(YUtils.isEmpty(htmlContent)){
-            Toast.makeText(this,"内容不能为空～", Toast.LENGTH_SHORT).show();
+        if (YUtils.isEmpty(htmlContent)) {
+            Toast.makeText(this, "内容不能为空～", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        if(isPosting){
-            return;
-        }
+        Log.e("****", "onPostClick: " + htmlContent);
 
-        isPosting = true;
-        showLoadingDialog();
 
-        tryAndPostContent();
+
+//        if(isPosting){
+//            return;
+//        }
+//
+//        isPosting = true;
+//        showLoadingDialog();
+//
+//        tryAndPostContent();
     }
 
     private void tryAndPostContent() {
@@ -284,11 +313,11 @@ public class EditorActivity extends AppCompatActivity implements View.OnClickLis
             //上传到服务器
 
             //这里我们简单退出
-            Toast.makeText(this,"提交成功", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "提交成功", Toast.LENGTH_SHORT).show();
             finish();
         } else {
             if (tryPostTime == MAX_TRY_UPLOAD_TIME) {
-                Toast.makeText(this,"上传图片超时，请重新提交。", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "上传图片超时，请重新提交。", Toast.LENGTH_SHORT).show();
                 resetPosting();
                 return;
             }
@@ -308,7 +337,7 @@ public class EditorActivity extends AppCompatActivity implements View.OnClickLis
         isPosting = false;
     }
 
-    private void startSelectImageIntent(){
+    private void startSelectImageIntent() {
         Matisse.from(this)
                 .choose(MimeType.allOf())
                 .countable(true)
@@ -319,8 +348,8 @@ public class EditorActivity extends AppCompatActivity implements View.OnClickLis
                 .forResult(REQUEST_CODE_SELECT_IMG);
     }
 
-    private void showLoadingDialog(){
-        if(progressDialog == null){
+    private void showLoadingDialog() {
+        if (progressDialog == null) {
             progressDialog = new ProgressDialog(this);
             progressDialog.setTitle("提交中");
             progressDialog.setIndeterminate(true);
@@ -329,8 +358,8 @@ public class EditorActivity extends AppCompatActivity implements View.OnClickLis
         progressDialog.show();
     }
 
-    private void hideLoadingDialog(){
-        if(progressDialog != null){
+    private void hideLoadingDialog() {
+        if (progressDialog != null) {
             progressDialog.dismiss();
         }
     }
@@ -338,7 +367,7 @@ public class EditorActivity extends AppCompatActivity implements View.OnClickLis
     /**
      * 模拟上传图片流程
      */
-    private class UploadImageTask extends AsyncTask<Object, Integer, String>{
+    private class UploadImageTask extends AsyncTask<Object, Integer, String> {
 
         private Uri uploadUri;
         private IUploadEngine.UploadProgressListener listener;
@@ -351,19 +380,17 @@ public class EditorActivity extends AppCompatActivity implements View.OnClickLis
         @Override
         protected String doInBackground(Object[] params) {
             int progress = 0;
-            try{
-
+            try {
                 //压缩， 处理 ，上传
-
-                while(progress ++ != 100){
+                while (progress++ != 100) {
                     publishProgress(progress);
                     Thread.sleep(100);
                 }
-            }catch (InterruptedException ex){
+            } catch (InterruptedException ex) {
                 cancel(true);
             }
             //这里返回你上传后的地址，为了简单处理，我们原本地址
-            return uploadUri.toString();
+            return "https://b-ssl.duitang.com/uploads/item/201810/03/20181003224714_FHLEt.thumb.700_0.jpeg";
         }
 
         @Override
@@ -374,7 +401,7 @@ public class EditorActivity extends AppCompatActivity implements View.OnClickLis
 
         @Override
         protected void onCancelled() {
-            listener.onUploadFail(uploadUri,"upload fail");
+            listener.onUploadFail(uploadUri, "upload fail");
         }
 
         @Override
