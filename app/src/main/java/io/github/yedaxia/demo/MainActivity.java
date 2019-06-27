@@ -1,15 +1,14 @@
 package io.github.yedaxia.demo;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
-import io.github.yedaxia.demo.R;
-
-public class MainActivity extends AppCompatActivity implements View.OnClickListener{
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     SpHelper spHelper;
 
@@ -24,10 +23,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.tv_rich_list).setOnClickListener(this);
         findViewById(R.id.tv_rich_editor).setOnClickListener(this);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -39,11 +38,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onResume() {
         super.onResume();
-        if("".equals(spHelper.getContent())){
+        if ("".equals(spHelper.getContent())) {
             findViewById(R.id.tv_raw_code).setVisibility(View.GONE);
             findViewById(R.id.tv_rich_list).setVisibility(View.GONE);
             findViewById(R.id.tv_rich_editor).setVisibility(View.GONE);
-        }else{
+        } else {
             findViewById(R.id.tv_raw_code).setVisibility(View.VISIBLE);
             findViewById(R.id.tv_rich_list).setVisibility(View.VISIBLE);
             findViewById(R.id.tv_rich_editor).setVisibility(View.VISIBLE);
@@ -52,12 +51,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
+        switch (v.getId()) {
             case R.id.tv_raw_code:
                 RawCodeActivity.launch(this);
                 break;
             case R.id.tv_rich_list:
-                ShowHtmlActivity.launch(this);
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+                alertDialogBuilder.setTitle("选择显示的控件")
+                        .setItems(new String[]{"WebView", "RecyclerView"}, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if (which == 0) {
+                                    ShowHtmlActivity.launchWithWebView(MainActivity.this);
+                                } else {
+                                    ShowHtmlActivity.launchWitRecyclerView(MainActivity.this);
+                                }
+                            }
+                        }).show();
                 break;
             case R.id.tv_rich_editor:
                 EditorActivity.launch(this, spHelper.getContent());

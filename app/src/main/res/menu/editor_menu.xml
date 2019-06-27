@@ -11,8 +11,8 @@
         app:showAsAction="always" />
 
     <item
-        android:id="@+id/action_preview"
+        android:id="@+id/action_post"
         android:orderInCategory="100"
-        android:title="预览"
+        android:title="提交"
         app:showAsAction="always" />
 </menu>

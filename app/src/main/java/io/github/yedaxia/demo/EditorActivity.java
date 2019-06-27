@@ -18,7 +18,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -261,7 +260,7 @@ public class EditorActivity extends AppCompatActivity implements View.OnClickLis
             case R.id.action_save_draft:
                 onSaveDraftClick();
                 break;
-            case R.id.action_preview:
+            case R.id.action_post:
                 onPostClick();
                 break;
         }
@@ -292,25 +291,21 @@ public class EditorActivity extends AppCompatActivity implements View.OnClickLis
             return;
         }
 
-        Log.e("****", "onPostClick: " + htmlContent);
+        if (isPosting) {
+            return;
+        }
 
+        isPosting = true;
+        showLoadingDialog();
 
-
-//        if(isPosting){
-//            return;
-//        }
-//
-//        isPosting = true;
-//        showLoadingDialog();
-//
-//        tryAndPostContent();
+        tryAndPostContent();
     }
 
     private void tryAndPostContent() {
         int uploadStatus = richTextEditor.tryIfSuccessAndReUpload();
         if (IUploadEngine.STATUS_UPLOAD_SUCCESS == uploadStatus) {
             String htmlContent = richTextEditor.getHtmlContent();
-            //上传到服务器
+            // TODO: 2019-06-27  在这里上传到服务器
 
             //这里我们简单退出
             Toast.makeText(this, "提交成功", Toast.LENGTH_SHORT).show();
@@ -389,7 +384,7 @@ public class EditorActivity extends AppCompatActivity implements View.OnClickLis
             } catch (InterruptedException ex) {
                 cancel(true);
             }
-            //这里返回你上传后的地址，为了简单处理，我们原本地址
+            //为了测试返回的链接，我放了一个网上找的图片
             return "https://b-ssl.duitang.com/uploads/item/201810/03/20181003224714_FHLEt.thumb.700_0.jpeg";
         }
 
